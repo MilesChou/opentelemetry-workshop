@@ -1,0 +1,9 @@
+services:
+    database:
+        image: postgres:16.4-alpine
+        restart: unless-stopped
+        environment:
+            - POSTGRES_PASSWORD=pass
+            - POSTGRES_DB=opentelemetry_workshop
+        ports:
+            - "127.0.0.1:5432:5432/tcp"
