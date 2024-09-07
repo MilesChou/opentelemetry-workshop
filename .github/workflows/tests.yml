@@ -1,0 +1,61 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+
+    services:
+      postgresql:
+        image: postgres:16.4-alpine
+        env:
+          POSTGRES_DB: opentelemetry_workshop
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5432:5432
+        options: --health-cmd=pg_isready --health-interval=10s --health-timeout=5s --health-retries=3
+
+    strategy:
+      fail-fast: true
+
+    name: Test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, , gd, redis, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp
+          ini-values: error_reporting=E_ALL
+          tools: composer:v2
+          coverage: none
+        env:
+          REDIS_CONFIGURE_OPTS: --enable-redis --enable-redis-igbinary --enable-redis-msgpack --enable-redis-lzf --with-liblzf --enable-redis-zstd --with-libzstd --enable-redis-lz4 --with-liblz4
+          REDIS_LIBS: liblz4-dev, liblzf-dev, libzstd-dev
+
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Generate Application Key
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Install NPM
+        run: npm install && npm run build
+
+      - name: Database Migration
+        run: php artisan migrate
+
+      - name: Execute tests
+        run: php vendor/bin/pest

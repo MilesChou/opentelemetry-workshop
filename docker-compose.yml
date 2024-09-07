@@ -7,3 +7,9 @@ services:
             - POSTGRES_DB=opentelemetry_workshop
         ports:
             - "127.0.0.1:5432:5432/tcp"
+        healthcheck:
+            test: pg_isready
+            start_period: 10s
+            interval: 3s
+            timeout: 3s
+            retries: 5
