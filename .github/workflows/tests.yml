@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, , gd, redis, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, , gd, redis, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp, opentelemetry
           ini-values: error_reporting=E_ALL
           tools: composer:v2
           coverage: none
