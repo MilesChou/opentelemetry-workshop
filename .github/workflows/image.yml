@@ -1,0 +1,26 @@
+name: Build base image for OpenTelemetry workshop
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Image tag'
+        required: true
+        default: 'latest'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and publish to GitHub Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: mileschou/opentelemetry-workshop/base-image
+          tags: ${{ inputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          dockerfile: .docker/Dockerfile

@@ -1,7 +1,6 @@
 services:
   web:
-    build:
-      context: .docker
+    image: ghcr.io/mileschou/opentelemetry-workshop/base-image
     init: true
     working_dir: /usr/src/app
     environment:
@@ -18,8 +17,7 @@ services:
         condition: service_completed_successfully
 
   migration:
-    build:
-      context: .docker
+    image: ghcr.io/mileschou/opentelemetry-workshop/base-image
     working_dir: /usr/src/app
     environment:
       - DB_HOST=database
