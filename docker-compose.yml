@@ -27,6 +27,18 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      bootstrapper:
+        condition: service_completed_successfully
+
+  bootstrapper:
+    image: ghcr.io/mileschou/opentelemetry-workshop/base-image
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: cp .env.example .env && php artisan key:generate
+    depends_on:
+      database:
+        condition: service_healthy
       composer:
         condition: service_completed_successfully
 
@@ -91,33 +103,6 @@ services:
       tempo:
         condition: service_healthy
 
-  prometheus:
-    image: quay.io/prometheus/prometheus:v2.51.2
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:9090:9090/tcp"
-    command:
-      - "--web.console.templates=/etc/prometheus/consoles"
-      - "--web.console.libraries=/etc/prometheus/console_libraries"
-      - "--storage.tsdb.retention.time=1h"
-      - "--config.file=/etc/prometheus/prometheus.yaml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.enable-lifecycle"
-      - "--web.route-prefix=/"
-      - "--web.enable-admin-api"
-      - "--web.enable-remote-write-receiver"
-      - "--enable-feature=native-histograms"
-      - "--enable-feature=exemplar-storage"
-      - "--enable-feature=otlp-write-receiver"
-    volumes:
-      - ./.docker/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
-    healthcheck:
-      test: wget http://127.0.0.1/-/ready -q -O /tmp/ready
-      start_period: 5s
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
     privileged: true
@@ -143,6 +128,33 @@ services:
       - ./.docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./.docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
 
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.51.2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090/tcp"
+    command:
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--storage.tsdb.retention.time=1h"
+      - "--config.file=/etc/prometheus/prometheus.yaml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--web.route-prefix=/"
+      - "--web.enable-admin-api"
+      - "--web.enable-remote-write-receiver"
+      - "--enable-feature=native-histograms"
+      - "--enable-feature=exemplar-storage"
+      - "--enable-feature=otlp-write-receiver"
+    volumes:
+      - ./.docker/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    healthcheck:
+      test: wget http://127.0.0.1:9090/-/ready -q -O /tmp/ready
+      start_period: 10s
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   loki:
     image: grafana/loki:3.1.0
     restart: unless-stopped
@@ -153,8 +165,8 @@ services:
     volumes:
       - ./.docker/loki/config.yaml:/etc/loki/config.yaml:ro
     healthcheck:
-      test: wget http://127.0.0.1/ready -q -O /tmp/ready
-      start_period: 5s
+      test: wget http://127.0.0.1:3100/ready -q -O /tmp/ready
+      start_period: 10s
       interval: 5s
       timeout: 3s
       retries: 5
@@ -169,8 +181,8 @@ services:
     volumes:
       - ./.docker/tempo/config.yaml:/etc/tempo/config.yaml:ro
     healthcheck:
-      test: wget http://127.0.0.1/ready -q -O /tmp/ready
-      start_period: 5s
+      test: wget http://127.0.0.1:3200/ready -q -O /tmp/ready
+      start_period: 10s
       interval: 5s
       timeout: 3s
       retries: 5
@@ -179,8 +191,8 @@ services:
     image: grafana/pyroscope:1.7.1
     restart: unless-stopped
     healthcheck:
-      test: wget http://127.0.0.1/healthz -q -O /tmp/healthz
-      start_period: 5s
+      test: wget http://127.0.0.1:4040/healthz -q -O /tmp/healthz
+      start_period: 10s
       interval: 5s
       timeout: 3s
       retries: 5

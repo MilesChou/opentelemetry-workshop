@@ -9,6 +9,12 @@
 
 ## 啟動服務
 
+首先必須安裝 PHP 依賴套件，這個過程可能會很久，因此建議先跑：
+
+    docker compose composer
+
+再來就可以把所有服務都啟動：
+
     docker compose up -d
 
 下面是啟動的服務：
