@@ -11,6 +11,11 @@
         "laravel/jetstream": "^5.1",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "open-telemetry/api": "^1.0",
+        "open-telemetry/exporter-otlp": "^1.0",
+        "open-telemetry/opentelemetry-auto-laravel": "^0.0.27",
+        "open-telemetry/opentelemetry-logger-monolog": "^1.0",
+        "open-telemetry/sdk": "^1.0",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

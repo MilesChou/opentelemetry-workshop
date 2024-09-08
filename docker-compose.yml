@@ -8,6 +8,18 @@ services:
       - MAIL_MAILER=smtp
       - MAIL_HOST=smtp
       - MAIL_PORT=1025
+      - OTEL_SERVICE_NAME=web
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://collector:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://collector:4318/v1/metrics
+      - OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://collector:4318/v1/logs
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_PHP_TRACES_PROCESSOR=simple
+      - OTEL_PHP_LOGS_PROCESSOR=simple
+      - OTEL_PHP_AUTOLOAD_ENABLED=true
+      - OTEL_PHP_TRACE_CLI_ENABLED=true
     ports:
       - "127.0.0.1:8000:8000/tcp"
     volumes:
@@ -24,6 +36,18 @@ services:
     working_dir: /usr/src/app
     environment:
       - DB_HOST=database
+      - OTEL_SERVICE_NAME=console
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://collector:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://collector:4318/v1/metrics
+      - OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://collector:4318/v1/logs
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_PHP_TRACES_PROCESSOR=simple
+      - OTEL_PHP_LOGS_PROCESSOR=simple
+      - OTEL_PHP_AUTOLOAD_ENABLED=true
+      - OTEL_PHP_TRACE_CLI_ENABLED=true
     volumes:
       - .:/usr/src/app
     command: php artisan migrate
@@ -51,6 +75,8 @@ services:
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
+    environment:
+      - OTEL_PHP_DISABLED_INSTRUMENTATIONS=all
     command: composer install --ignore-platform-reqs
 
   database:
