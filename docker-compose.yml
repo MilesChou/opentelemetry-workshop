@@ -29,13 +29,14 @@ services:
         condition: service_healthy
       bootstrapper:
         condition: service_completed_successfully
+        required: false
 
   bootstrapper:
     image: ghcr.io/mileschou/opentelemetry-workshop/base-image
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
-    command: cp .env.example .env && php artisan key:generate
+    command: sh -c "test ! -e .env && cp .env.example .env && php artisan key:generate"
     depends_on:
       database:
         condition: service_healthy
