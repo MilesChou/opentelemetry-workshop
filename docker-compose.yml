@@ -14,6 +14,8 @@ services:
     depends_on:
       migration:
         condition: service_completed_successfully
+      composer:
+        condition: service_completed_successfully
 
   migration:
     build:
@@ -24,6 +26,18 @@ services:
     volumes:
       - .:/usr/src/app
     command: php artisan migrate
+    depends_on:
+      database:
+        condition: service_healthy
+      composer:
+        condition: service_completed_successfully
+
+  composer:
+    image: composer:2
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: composer install --ignore-platform-reqs
 
   database:
     image: postgres:16.4-alpine
