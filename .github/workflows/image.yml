@@ -11,9 +11,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and publish to GitHub Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
@@ -24,3 +27,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
           dockerfile: .docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
