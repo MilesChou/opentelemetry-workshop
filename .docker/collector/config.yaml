@@ -35,17 +35,32 @@ exporters:
 service:
   pipelines:
     traces:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [otlp/tempo, debug]
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        #- batch
+      exporters:
+        - otlp/tempo
+        - debug
     metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [prometheus, debug]
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        #- batch
+      exporters:
+        - prometheus
+        - debug
     logs:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [loki, debug]
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        #- batch
+      exporters:
+        - loki
+        - debug
 
   telemetry:
     metrics:

@@ -72,12 +72,6 @@ services:
       - TRACING_PROVIDERS_OTLP_INSECURE=true
       - TRACING_PROVIDERS_OTLP_SAMPLING_SAMPLING_RATIO=1.0
       - TRACING_PROVIDERS_OTLP_SERVER_URL=collector:4318
-        # See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md
-      - OTEL_SERVICE_NAME=hydra
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://collector:4318/v1/traces
-      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://collector:4318/v1/metrics
-      - OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://collector:4318/v1/logs
     volumes:
       - hydra:/tmp
     entrypoint: []
@@ -91,6 +85,13 @@ services:
       - GOMEMLIMIT=384MiB
     volumes:
       - ./.docker/collector/config.yaml:/etc/otelcol-contrib/config.yaml
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
 
   prometheus:
     image: quay.io/prometheus/prometheus:v2.51.2
@@ -112,6 +113,12 @@ services:
       - "--enable-feature=otlp-write-receiver"
     volumes:
       - ./.docker/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    healthcheck:
+      test: wget http://127.0.0.1/-/ready -q -O /tmp/ready
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -147,6 +154,12 @@ services:
     ]
     volumes:
       - ./.docker/loki/config.yaml:/etc/loki/config.yaml:ro
+    healthcheck:
+      test: wget http://127.0.0.1/ready -q -O /tmp/ready
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   tempo:
     image: grafana/tempo:2.5.0
@@ -157,10 +170,22 @@ services:
     ]
     volumes:
       - ./.docker/tempo/config.yaml:/etc/tempo/config.yaml:ro
+    healthcheck:
+      test: wget http://127.0.0.1/ready -q -O /tmp/ready
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   pyroscope:
     image: grafana/pyroscope:1.7.1
     restart: unless-stopped
+    healthcheck:
+      test: wget http://127.0.0.1/healthz -q -O /tmp/healthz
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   promtail:
     image: grafana/promtail:3.0.0
