@@ -5,6 +5,9 @@ services:
     working_dir: /usr/src/app
     environment:
       - DB_HOST=database
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=smtp
+      - MAIL_PORT=1025
     ports:
       - "127.0.0.1:8000:8000/tcp"
     volumes:
@@ -87,6 +90,12 @@ services:
       - hydra:/tmp
     entrypoint: []
     command: sh -c "hydra serve all --dev > /tmp/hydra.log 2>&1"
+
+  smtp:
+    image: mailhog/mailhog
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025/tcp"
 
   collector:
     image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.108.0

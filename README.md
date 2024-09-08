@@ -27,6 +27,7 @@
 |                                                                      | http://127.0.0.0:4445/       |
 |                                                                      | http://127.0.0.0:4446/       |
 | [Collector](https://opentelemetry.io/docs/collector/)                | Docker Internal              |
+| [MailHog](https://github.com/mailhog/MailHog)                        | http://127.0.0.0:8025/       |
 | [Prometheus](https://prometheus.io/)                                 | http://127.0.0.1:9090/       |
 | [cAdvisor](https://github.com/google/cadvisor)                       | Docker Internal              |
 | [Grafana](https://grafana.com/)                                      | http://127.0.0.1:3000/       |
