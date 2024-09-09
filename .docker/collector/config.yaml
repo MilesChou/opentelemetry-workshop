@@ -14,6 +14,33 @@ processors:
     limit_mib: 256
     spike_limit_mib: 128
 
+  filter/application_health:
+    traces:
+      span:
+        - 'attributes["http.route"] == "api/health" and resource.attributes["service.name"] == "web"'
+
+  # See https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md
+  tail_sampling:
+    policies:
+      - name: always-when-above-1ms
+        type: latency
+        latency:
+          threshold_ms: 1
+      - name: always-when-error
+        type: status_code
+        status_code:
+          status_codes:
+            - ERROR
+      - name: sample-rate
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 100
+    decision_wait: 30s
+    num_traces: 50000
+    expected_new_traces_per_sec: 1000
+    decision_cache:
+      sampled_cache_size: 100000
+
 exporters:
   debug:
     verbosity: detailed
@@ -38,7 +65,9 @@ service:
       receivers:
         - otlp
       processors:
-        - memory_limiter
+        #- memory_limiter
+        - filter/application_health
+        - tail_sampling
         #- batch
       exporters:
         - otlp/tempo
@@ -47,7 +76,7 @@ service:
       receivers:
         - otlp
       processors:
-        - memory_limiter
+        #- memory_limiter
         #- batch
       exporters:
         - prometheus
@@ -56,7 +85,7 @@ service:
       receivers:
         - otlp
       processors:
-        - memory_limiter
+        #- memory_limiter
         #- batch
       exporters:
         - loki
