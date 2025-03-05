@@ -33,10 +33,11 @@ services:
 
   migration:
     image: ghcr.io/mileschou/opentelemetry-workshop/base-image
+    init: true
     working_dir: /usr/src/app
     environment:
       - DB_HOST=database
-      - OTEL_SERVICE_NAME=console
+      - OTEL_SERVICE_NAME=migration
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://collector:4318/v1/traces
       - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://collector:4318/v1/metrics
@@ -46,8 +47,9 @@ services:
       - OTEL_LOGS_EXPORTER=otlp
       - OTEL_PHP_TRACES_PROCESSOR=simple
       - OTEL_PHP_LOGS_PROCESSOR=simple
-      - OTEL_PHP_AUTOLOAD_ENABLED=true
-      - OTEL_PHP_TRACE_CLI_ENABLED=true
+      - OTEL_PHP_DISABLED_INSTRUMENTATIONS=all
+      - OTEL_PHP_AUTOLOAD_ENABLED=false
+      - OTEL_PHP_TRACE_CLI_ENABLED=false
     volumes:
       - .:/usr/src/app
     command: php artisan migrate
@@ -60,9 +62,14 @@ services:
 
   bootstrapper:
     image: ghcr.io/mileschou/opentelemetry-workshop/base-image
+    init: true
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
+    environment:
+      - OTEL_PHP_DISABLED_INSTRUMENTATIONS=all
+      - OTEL_PHP_AUTOLOAD_ENABLED=false
+      - OTEL_PHP_TRACE_CLI_ENABLED=false
     command: sh -c "test ! -e .env && cp .env.example .env && php artisan key:generate"
     depends_on:
       database:
@@ -72,11 +79,14 @@ services:
 
   composer:
     image: composer:2
+    init: true
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
     environment:
       - OTEL_PHP_DISABLED_INSTRUMENTATIONS=all
+      - OTEL_PHP_AUTOLOAD_ENABLED=false
+      - OTEL_PHP_TRACE_CLI_ENABLED=false
     command: composer install --ignore-platform-reqs
 
   database:
@@ -95,7 +105,7 @@ services:
       retries: 5
 
   hydra:
-    image: oryd/hydra:v2.2.0
+    image: oryd/hydra:v2.3.0
     restart: unless-stopped
     ports:
       - "127.0.0.1:4444:4444/tcp"
@@ -118,7 +128,7 @@ services:
     command: sh -c "hydra serve all --dev > /tmp/hydra.log 2>&1"
 
   smtp:
-    image: mailhog/mailhog
+    image: axllent/mailpit:v1.23
     restart: unless-stopped
     ports:
       - "127.0.0.1:8025:8025/tcp"
