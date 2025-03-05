@@ -11,8 +11,8 @@ processors:
   batch:
   memory_limiter:
     check_interval: 5s
-    limit_mib: 256
-    spike_limit_mib: 128
+    limit_mib: 128
+    spike_limit_mib: 96
 
   filter/application_health:
     traces:
